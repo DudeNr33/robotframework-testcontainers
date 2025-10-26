@@ -1,0 +1,29 @@
+[project]
+name = "robotframework-testcontainers"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+  { name = "DudeNr33", email = "3929834+DudeNr33@users.noreply.github.com" },
+]
+requires-python = ">=3.14"
+dependencies = ["robotframework>=7.3.2", "testcontainers>=4.13.2"]
+
+[build-system]
+requires = ["uv_build>=0.9.5,<0.10.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "TestcontainersLibrary"
+module-root = "src"
+
+[dependency-groups]
+dev = [
+    "mypy>=1.18.2",
+    "pre-commit>=4.3.0",
+    "ruff>=0.14.2",
+]
+lsp = ["robotcode[all]>=2.0.1"]
+
+[tool.mypy]
+ignore_missing_imports = true
