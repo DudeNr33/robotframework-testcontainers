@@ -11,9 +11,9 @@ class TestcontainersLibrary:
 
     @keyword
     def create_docker_container(
-        self, image: str, start: bool = True
+        self, image: str, start: bool = True, ports: list[int] | None = None
     ) -> DockerContainer:
-        container = DockerContainer(image=image)
+        container = DockerContainer(image=image, ports=ports)
         if start:
             self.start_container(container)
         return container
