@@ -2,6 +2,7 @@
 Documentation       Demonstrate and test the basic usage of plain DockerContainer testcontainers.
 
 Library             TestcontainersLibrary
+Library             RequestsLibrary
 
 Suite Setup         Create Docker Container    image=hello-world
 
@@ -30,3 +31,12 @@ Containers are cleaned up automatically
     Create Docker Container    image=hello-world
     Log    This test does not explicitly stop the created container.
     Log    Watch the console output to see how it's cleaned up!
+
+Access testcontainer methods
+    [Documentation]    As the `Create Docker Container` keyword returns the `DockerContainer` instance,
+    ...    any method not accessible via keywords can be called directly on the variable.
+    ${container}=    Create Docker Container    image=traefik/whoami    start=False
+    # Example: expose ports
+    Start Container    ${container.with_exposed_ports(80)}
+    VAR    ${exposed_port}=    ${container.get_exposed_port(80)}
+    GET    http://localhost:${exposed_port}/api

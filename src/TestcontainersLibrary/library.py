@@ -2,6 +2,7 @@ from robot.api.deco import library, keyword
 from robot.api import logger
 from testcontainers.core.container import DockerContainer
 from testcontainers.core.wait_strategies import LogMessageWaitStrategy, HttpWaitStrategy
+from testcontainers.generic.server import ServerContainer
 
 
 @library(listener="SELF")
@@ -14,6 +15,15 @@ class TestcontainersLibrary:
         self, image: str, start: bool = True, ports: list[int] | None = None
     ) -> DockerContainer:
         container = DockerContainer(image=image, ports=ports)
+        if start:
+            self.start_container(container)
+        return container
+
+    @keyword
+    def create_server_container(
+        self, port: int, image: str, start: bool = True
+    ) -> ServerContainer:
+        container = ServerContainer(port=port, image=image)
         if start:
             self.start_container(container)
         return container
