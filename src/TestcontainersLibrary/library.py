@@ -1,3 +1,4 @@
+from pathlib import Path
 from robot.api.deco import library, keyword
 from robot.api import logger
 from testcontainers.core.container import DockerContainer
@@ -12,12 +13,31 @@ class TestcontainersLibrary:
 
     @keyword
     def create_docker_container(
-        self, image: str, start: bool = True, ports: list[int] | None = None
+        self,
+        image: str,
+        command: str | None = None,
+        env: dict[str, str] | None = None,
+        name: str | None = None,
+        ports: list[int] | None = None,
+        volumes: list[tuple[Path, str, str]] | None = None,
+        start: bool = True,
     ) -> DockerContainer:
-        container = DockerContainer(image=image, ports=ports)
+        container = DockerContainer(
+            image=image,
+            command=command,
+            env=env,
+            name=name,
+            ports=ports,
+            volumes=self._resolve_volume_paths(volumes) if volumes else None,
+        )
         if start:
             self.start_container(container)
         return container
+
+    def _resolve_volume_paths(
+        self, volumes: list[tuple[Path, str, str]]
+    ) -> list[tuple[str, str, str]]:
+        return [(v[0].resolve().as_posix(), v[1], v[2]) for v in volumes]
 
     @keyword
     def create_server_container(
