@@ -57,6 +57,28 @@ Advanced Usage with more control
     Stop Container    ${container}
 ```
 
+You can also use any of the community maintained containers.
+Be aware that you have to make sure to install the required dependencies
+yourself.  
+For example: starting a CockroachDB container requires installing `testcontainers[cockroachdb]`.
+Afterwards you can start it via:
+
+```robot
+*** Settings ***
+Library             TestcontainersLibrary
+
+
+*** Test Cases ***
+Starting an CockroachDb Container
+    ${password}=    Evaluate    str(uuid.uuid4())
+    ${container}=    Create Community Container
+    ...    module=testcontainers.cockroachdb
+    ...    container_class=CockroachDBContainer
+    ...    username=demoUser
+    ...    password=${password}
+    Log    ${container.get_connection_url()}
+```
+
 You can read the acceptance tests in `test/acceptance/` for more concrete usage examples.
 
 ## License

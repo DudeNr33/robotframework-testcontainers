@@ -1,6 +1,11 @@
 version = 1
 revision = 3
 requires-python = ">=3.10"
+resolution-markers = [
+    "python_full_version >= '3.14' and platform_python_implementation != 'PyPy'",
+    "python_full_version < '3.14' and platform_python_implementation != 'PyPy'",
+    "platform_python_implementation == 'PyPy'",
+]
 
 [[package]]
 name = "anyio"
@@ -874,11 +879,10 @@ dependencies = [
 dev = [
     { name = "mypy" },
     { name = "pre-commit" },
+    { name = "robotcode", extra = ["all"] },
     { name = "robotframework-requests" },
     { name = "ruff" },
-]
-lsp = [
-    { name = "robotcode", extra = ["all"] },
+    { name = "testcontainers", extra = ["redis"] },
 ]
 
 [package.metadata]
@@ -891,10 +895,11 @@ requires-dist = [
 dev = [
     { name = "mypy", specifier = ">=1.18.2" },
     { name = "pre-commit", specifier = ">=4.3.0" },
+    { name = "robotcode", extras = ["all"], specifier = ">=2.0.1" },
     { name = "robotframework-requests", specifier = ">=0.9.7" },
     { name = "ruff", specifier = ">=0.14.2" },
+    { name = "testcontainers", extras = ["cockroachdb", "redis"], specifier = ">=4.13.2" },
 ]
-lsp = [{ name = "robotcode", extras = ["all"], specifier = ">=2.0.1" }]
 
 [[package]]
 name = "ruff"
@@ -950,6 +955,9 @@ wheels = [
 [package.optional-dependencies]
 generic = [
     { name = "httpx" },
+    { name = "redis" },
+]
+redis = [
     { name = "redis" },
 ]
 

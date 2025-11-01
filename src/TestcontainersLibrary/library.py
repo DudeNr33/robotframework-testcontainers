@@ -1,3 +1,4 @@
+import importlib
 from pathlib import Path
 from robot.api.deco import library, keyword
 from robot.api import logger
@@ -44,6 +45,17 @@ class TestcontainersLibrary:
         self, port: int, image: str, start: bool = True
     ) -> ServerContainer:
         container = ServerContainer(port=port, image=image)
+        if start:
+            self.start_container(container)
+        return container
+
+    @keyword
+    def create_community_container(
+        self, module: str, container_class: str, start: bool = True, **kwargs
+    ) -> DockerContainer:
+        _module = importlib.import_module(module)
+        clazz = getattr(_module, container_class)
+        container = clazz(**kwargs)
         if start:
             self.start_container(container)
         return container
