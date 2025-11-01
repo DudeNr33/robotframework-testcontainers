@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Robot Framework keywords for Testcontainers."
 readme = "README.md"
 authors = [{ name = "Andreas Finkler", email = "andi.finkler@gmail.com" }]
-requires-python = ">=3.14"
+requires-python = ">=3.10"
 dependencies = ["robotframework>=7.3.2", "testcontainers[generic]>=4.13.2"]
 
 [build-system]
