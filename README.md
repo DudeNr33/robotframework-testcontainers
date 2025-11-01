@@ -4,8 +4,6 @@ Robot Framework keywords for [testcontainers](https://github.com/testcontainers/
 
 ## Installation
 
-> NOTE: the package is currently not yet published on PyPI.
-
 - using `pip`:
 
 ```shell
@@ -61,7 +59,8 @@ You can also use any of the community maintained containers.
 Be aware that you have to make sure to install the required dependencies
 yourself.  
 For example: starting a CockroachDB container requires installing `testcontainers[cockroachdb]`.
-Afterwards you can start it via:
+Use the `Create Community Container` keyword and specify which class to import from which module.
+Any additional arguments can be passed in as keyword arguments.
 
 ```robot
 *** Settings ***
