@@ -21,7 +21,7 @@ Create a container and modify it before starting
     ${container}=    Create Docker Container    image=traefik/whoami    start=False
     ${container}=    Bind Ports    ${container}    container_port=80    host_port=8088
     Start Container    ${container}
-    Wait For Http Endpoint    container=${container}    port=80    path=/api
+    Wait For Http Endpoint    container=${container}    port=80    path=/api    status_code=200
     Stop Container    ${container}
 
 Containers are cleaned up automatically
