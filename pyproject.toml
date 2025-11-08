@@ -4,8 +4,29 @@ version = "0.1.0"
 description = "Robot Framework keywords for Testcontainers."
 readme = "README.md"
 authors = [{ name = "Andreas Finkler", email = "andi.finkler@gmail.com" }]
+license = "MIT"
+license-file = "LICENSE"
+keywords = [
+  "robotframework",
+  "testing",
+  "test",
+  "automation",
+  "container",
+  "testcontainers",
+  "docker",
+]
 requires-python = ">=3.10"
 dependencies = ["robotframework>=7.3.2", "testcontainers[generic]>=4.13.2"]
+classifiers = [
+  "Framework :: Robot Framework",
+  "Framework :: Robot Framework :: Library",
+  "Topic :: Software Development :: Testing",
+  "Topic :: Software Development :: Testing :: Mocking",
+]
+
+[project.urls]
+Repository = "https://github.com/DudeNr33/robotframework-testcontainers"
+Documentation = "https://dudenr33.github.io/robotframework-testcontainers/"
 
 [build-system]
 requires = ["uv_build>=0.9.5,<0.10.0"]
