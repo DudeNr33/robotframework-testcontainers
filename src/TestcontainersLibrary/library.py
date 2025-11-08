@@ -1,4 +1,5 @@
 import importlib
+from typing import Any
 from pathlib import Path
 from robot.api.deco import library, keyword
 from robot.api import logger
@@ -13,7 +14,7 @@ class TestcontainersLibrary:
     Keywords for [https://testcontainers.com/|Testcontainers].
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._containers: list[DockerContainer] = []
 
     @keyword
@@ -76,7 +77,7 @@ class TestcontainersLibrary:
 
     @keyword
     def create_community_container(
-        self, module: str, container_class: str, start: bool = True, **kwargs
+        self, module: str, container_class: str, start: bool = True, **kwargs: Any
     ) -> DockerContainer:
         """
         Create a [https://testcontainers-python.readthedocs.io/en/latest/modules/index.html|community maintained container].
@@ -162,7 +163,7 @@ class TestcontainersLibrary:
         self._containers.remove(container)
         container.stop()
 
-    def _end_test(self, name, attrs) -> None:
+    def _end_test(self, name: Any, attrs: Any) -> None:
         for container in self._containers.copy():
             cname = container.get_wrapped_container().name
             logger.console(
@@ -170,7 +171,7 @@ class TestcontainersLibrary:
             )
             self.stop_container(container)
 
-    def _end_suite(self, name, attrs) -> None:
+    def _end_suite(self, name: Any, attrs: Any) -> None:
         for container in self._containers.copy():
             cname = container.get_wrapped_container().name
             logger.console(
