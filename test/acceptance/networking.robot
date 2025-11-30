@@ -24,10 +24,12 @@ Specify network directly when creating the container
 
     # Create a second container on the same network and check if we can connect to the server.
     ${client}=    Create Docker Container
-    ...    image=nginx:stable
+    ...    image=curlimages/curl:latest
     ...    network=${network}
-    ...    command=curl http://server/api
-    Sleep    1s
+    ...    command=http://server/api
+    # Wait a bit, because sometimes testcontainers gets confused if
+    # the container is a one-off container that directly exits.
+    Sleep    0.5s
     Wait For Log Message    ${client}    hostname
 
 Connecting containers after they were created
@@ -43,8 +45,10 @@ Connecting containers after they were created
 
     # Create a client container and verify we can connect to the server.
     ${client}=    Create Docker Container
-    ...    image=nginx:stable
+    ...    image=curlimages/curl:latest
     ...    network=${network}
-    ...    command=curl http://server/api
-    Sleep    1s
+    ...    command=http://server/api
+    # Wait a bit, because sometimes testcontainers gets confused if
+    # the container is a one-off container that directly exits.
+    Sleep    0.5s
     Wait For Log Message    ${client}    hostname
