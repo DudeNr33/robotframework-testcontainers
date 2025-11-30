@@ -187,6 +187,7 @@ class TestcontainersLibrary:
         """
         Delete the given network.
         """
+        self._networks.remove(network)
         network.remove()
 
     @keyword
@@ -197,7 +198,7 @@ class TestcontainersLibrary:
         aliases: list[str] | None = None,
     ) -> None:
         """
-        Connect an container to a network. It will be reachable from other containers by its alias, if set.
+        Connect a container to a network. It will be reachable from other containers by its alias, if set.
         """
         container_id = container.get_wrapped_container().id
         if container_id is None:

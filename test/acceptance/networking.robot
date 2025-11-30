@@ -14,7 +14,7 @@ Specify network directly when creating the container
     ${network}=    Create Network
 
     # Next, we create a container running a simple server, and pass in the network.
-    # Additionally, we specify und which alias(es) the server should be reachable on this network.
+    # Additionally, we specify under which alias(es) the server should be reachable on this network.
     ${server}=    Create Docker Container
     ...    image=traefik/whoami
     ...    ports=[80]
