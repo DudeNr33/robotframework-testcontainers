@@ -1,10 +1,12 @@
 import importlib
-from typing import Any
 from pathlib import Path
-from robot.api.deco import library, keyword
+from typing import Any
+
 from robot.api import logger
+from robot.api.deco import keyword, library
 from testcontainers.core.container import DockerContainer
-from testcontainers.core.wait_strategies import LogMessageWaitStrategy, HttpWaitStrategy
+from testcontainers.core.network import Network
+from testcontainers.core.wait_strategies import HttpWaitStrategy, LogMessageWaitStrategy
 from testcontainers.generic.server import ServerContainer
 
 
@@ -16,6 +18,7 @@ class TestcontainersLibrary:
 
     def __init__(self) -> None:
         self._containers: list[DockerContainer] = []
+        self._networks: list[Network] = []
 
     @keyword
     def create_docker_container(
@@ -26,6 +29,8 @@ class TestcontainersLibrary:
         name: str | None = None,
         ports: list[int] | None = None,
         volumes: list[tuple[Path, str, str]] | None = None,
+        network: Network | None = None,
+        network_aliases: list[str] | None = None,
         start: bool = True,
     ) -> DockerContainer:
         """
@@ -46,6 +51,8 @@ class TestcontainersLibrary:
             name=name,
             ports=ports,
             volumes=self._resolve_volume_paths(volumes) if volumes else None,
+            network=network,
+            network_aliases=network_aliases,
         )
         if start:
             self.start_container(container)
@@ -163,6 +170,27 @@ class TestcontainersLibrary:
         self._containers.remove(container)
         container.stop()
 
+    @keyword
+    def create_network(self) -> Network:
+        """
+        Create a network to connect different containers with each other.
+
+        Created networks are cleaned up automatically at the end of the test/suite.
+        """
+        network = Network()
+        network.create()
+        self._networks.append(network)
+        return network
+
+    @keyword
+    def remove_network(self, network: Network) -> None:
+        """
+        Delete the given network.
+        """
+        network.remove()
+
+    # TODO: check out network.connect
+
     def _end_test(self, name: Any, attrs: Any) -> None:
         for container in self._containers.copy():
             cname = container.get_wrapped_container().name
@@ -170,6 +198,11 @@ class TestcontainersLibrary:
                 f"\n\tTestcontainersLibrary: stopping container {cname} in end_test hook."
             )
             self.stop_container(container)
+        for network in self._networks.copy():
+            logger.console(
+                f"\n\tTestcontainersLibrary: removing network {network.id} in end_test hook."
+            )
+            self.remove_network(network)
 
     def _end_suite(self, name: Any, attrs: Any) -> None:
         for container in self._containers.copy():
@@ -178,3 +211,8 @@ class TestcontainersLibrary:
                 f"\n\tTestcontainersLibrary: stopping container {cname} in end_suite hook."
             )
             self.stop_container(container)
+        for network in self._networks.copy():
+            logger.console(
+                f"\n\tTestcontainersLibrary: removing network {network.id} in end_suite hook."
+            )
+            self.remove_network(network)
