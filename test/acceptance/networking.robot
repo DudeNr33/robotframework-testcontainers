@@ -10,13 +10,19 @@ Specify network directly when creating the container
     ...    Set a network alias if you want other networks to be able to communicate with it via hostname.
     ...    Created networks are automatically cleaned up in the end_test / end_suite hooks, just as the
     ...    the containers themselves.
+    # First we create the network
     ${network}=    Create Network
+
+    # Next, we create a container running a simple server, and pass in the network.
+    # Additionally, we specify und which alias(es) the server should be reachable on this network.
     ${server}=    Create Docker Container
     ...    image=traefik/whoami
     ...    ports=[80]
     ...    network=${network}
     ...    network_aliases=["server"]
     Wait For Http Endpoint    container=${server}    port=80    path=/api    status_code=200
+
+    # Create a second container on the same network and check if we can connect to the server.
     ${client}=    Create Docker Container
     ...    image=nginx:stable
     ...    network=${network}
