@@ -21,5 +21,24 @@ Specify network directly when creating the container
     ...    image=nginx:stable
     ...    network=${network}
     ...    command=curl http://server/api
+    Sleep    1s
     Wait For Log Message    ${client}    hostname
-    Log    ${client.get_logs()[0]}
+
+Connecting containers after they were created
+    [Documentation]    Containers can also be connected to a network after they are created.
+    ...    This can be especially useful for container types that do not support directly passing in
+    ...    the network when creating the container.
+    # ServerContainer does not support the `network` parameter, therefore we need to connect it afterwards.
+    ${server}=    Create Server Container    image=traefik/whoami    port=80
+
+    # Create the network and then connect the container to it
+    ${network}=    Create Network
+    Connect Container To Network    ${server}    ${network}    aliases=["server"]
+
+    # Create a client container and verify we can connect to the server.
+    ${client}=    Create Docker Container
+    ...    image=nginx:stable
+    ...    network=${network}
+    ...    command=curl http://server/api
+    Sleep    1s
+    Wait For Log Message    ${client}    hostname

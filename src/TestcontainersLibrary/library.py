@@ -189,7 +189,20 @@ class TestcontainersLibrary:
         """
         network.remove()
 
-    # TODO: check out network.connect
+    @keyword
+    def connect_container_to_network(
+        self,
+        container: DockerContainer,
+        network: Network,
+        aliases: list[str] | None = None,
+    ) -> None:
+        """
+        Connect an container to a network. It will be reachable from other containers by its alias, if set.
+        """
+        container_id = container.get_wrapped_container().id
+        if container_id is None:
+            raise ValueError("Failed to obtain ID of wrapped container")
+        network.connect(container_id=container_id, network_aliases=aliases)
 
     def _end_test(self, name: Any, attrs: Any) -> None:
         for container in self._containers.copy():
