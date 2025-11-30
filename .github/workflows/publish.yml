@@ -7,7 +7,7 @@ on:
       - v*
 
 jobs:
-  run:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
