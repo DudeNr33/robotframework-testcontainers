@@ -9,11 +9,6 @@ on:
 jobs:
   run:
     runs-on: ubuntu-latest
-    environment:
-      name: pypi
-    permissions:
-      id-token: write
-      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -29,5 +24,26 @@ jobs:
         run: uv run --isolated --no-project --with dist/*.whl --with robotframework-requests robot test/acceptance
       - name: Smoke test (source distribution)
         run: uv run --isolated --no-project --with dist/*.tar.gz --with robotframework-requests robot test/acceptance
-      - name: Publish
-        run: uv publish
+      - name: Store the distribution packages
+        uses: actions/upload-artifact@v5
+        with:
+          name: python-package-distributions
+          path: dist/
+  publish-to-pypi:
+    name: Publish Python distribution to PyPI
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/robotframework-testcontainers
+    permissions:
+      # mandatory for trusted publishing
+      id-token: write
+    steps:
+      - name: Download distribution files
+        uses: actions/download-artifact@v6
+        with:
+          name: python-package-distributions
+          path: dist/
+      - name: Publish distribution to PyPI
+        uses: pypa/gh-action-pypi-publish@v1.13.0
