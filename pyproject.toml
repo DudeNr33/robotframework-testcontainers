@@ -1,6 +1,6 @@
 [project]
 name = "robotframework-testcontainers"
-version = "0.1.0"
+version = "0.2.0"
 description = "Robot Framework keywords for Testcontainers."
 readme = "README.md"
 authors = [{ name = "Andreas Finkler", email = "andi.finkler@gmail.com" }]
