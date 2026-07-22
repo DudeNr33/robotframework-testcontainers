@@ -7,7 +7,7 @@ from robot.api.deco import keyword, library
 from testcontainers.core.container import DockerContainer
 from testcontainers.core.network import Network
 from testcontainers.core.wait_strategies import HttpWaitStrategy, LogMessageWaitStrategy
-from testcontainers.generic.server import ServerContainer
+from testcontainers.generic import ServerContainer
 
 
 @library(listener="SELF")
