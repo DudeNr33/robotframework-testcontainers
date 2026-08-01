@@ -37,6 +37,7 @@ jobs:
         with:
           python-version: "3.13"
           version: "0.9.5"
+          enable-cache: false
       - name: Build docs
         run: uv run libdoc --name TestcontainersLibrary src/TestcontainersLibrary/library.py docs/index.html
       - name: Setup Pages

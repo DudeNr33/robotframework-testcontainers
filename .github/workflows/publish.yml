@@ -22,6 +22,7 @@ jobs:
         with:
           python-version: "3.13"
           version: "0.9.5"
+          enable-cache: false
       - name: Build
         run: uv build
       # Check that basic features work and we didn't miss to include crucial files
