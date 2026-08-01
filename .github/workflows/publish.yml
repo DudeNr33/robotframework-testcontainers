@@ -6,12 +6,17 @@ on:
       # Publish on any tag starting with a `v`, e.g., v0.1.0
       - v*
 
+permissions: {}
 jobs:
   build:
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v5
+        with:
+          persist-credentials: false
       - name: Install uv
         uses: astral-sh/setup-uv@v6
         with:
