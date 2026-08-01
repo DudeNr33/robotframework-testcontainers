@@ -4,10 +4,10 @@ from typing import Any
 
 from robot.api import logger
 from robot.api.deco import keyword, library
+from testcontainers.community.generic import ServerContainer
 from testcontainers.core.container import DockerContainer
 from testcontainers.core.network import Network
 from testcontainers.core.wait_strategies import HttpWaitStrategy, LogMessageWaitStrategy
-from testcontainers.community.generic import ServerContainer
 
 
 @library(listener="SELF")
