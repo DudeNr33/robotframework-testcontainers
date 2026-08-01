@@ -32,6 +32,10 @@ Documentation = "https://dudenr33.github.io/robotframework-testcontainers/"
 requires = ["uv_build>=0.9.5,<0.10.0"]
 build-backend = "uv_build"
 
+[tool.uv]
+exclude-newer = "7 days"
+audit.malware-check = true
+
 [tool.uv.build-backend]
 module-name = "TestcontainersLibrary"
 module-root = "src"
