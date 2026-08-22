@@ -249,7 +249,7 @@ name = "exceptiongroup"
 version = "1.3.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "typing-extensions" },
+    { name = "typing-extensions", marker = "python_full_version < '3.13'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/50/79/66800aadf48771f6b62f7eb014e352e5d06856655206165d775e675a02c9/exceptiongroup-1.3.1.tar.gz", hash = "sha256:8b412432c6055b0b7d14c310000ae93352ed6754f70fa8f7c34141f91c4e3219", size = 30371, upload-time = "2025-11-21T23:01:54.787Z" }
 wheels = [
@@ -1161,6 +1161,28 @@ wheels = [
 ]
 
 [[package]]
+name = "robotframework-assertion-engine"
+version = "5.0.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "robotframework" },
+    { name = "robotframework-pythonlibcore" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/a8/2d/2ab475562a50685e563c492b205fca53fa2e9459572fb177c9b9d4c83ab5/robotframework_assertion_engine-5.0.1.tar.gz", hash = "sha256:f8c1dd2757064808a432558f46a395da942f223d74a110419fc689992f9d600e", size = 13686, upload-time = "2026-06-04T12:48:04.35Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/53/c6/6e631505e8c74a435c8b8e97fa7f5edb49ebe29b25cea8f4595546453014/robotframework_assertion_engine-5.0.1-py3-none-any.whl", hash = "sha256:04e96205213221e190252c487affe32c22aad78c6176a4b0d5e4ff7e67336394", size = 14161, upload-time = "2026-06-04T12:48:03.159Z" },
+]
+
+[[package]]
+name = "robotframework-pythonlibcore"
+version = "4.6.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/48/58/dd3fb5cfd3ff1659e778c5fba61c54451eb3c9c1bca5cea1c7925bf163d1/robotframework_pythonlibcore-4.6.0.tar.gz", hash = "sha256:c45acbdf781b35a5cbac8e1c019fedab87d99f34ff29a6c99b774fbd95313f27", size = 14196, upload-time = "2026-05-14T19:27:21.871Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/dc/b5/188f79e1d6ba281880a6817156d2fa8b89a1e034f6be0390425f4fb2969b/robotframework_pythonlibcore-4.6.0-py3-none-any.whl", hash = "sha256:db8d707961a0b83a5497d9c02b8919805e47b73907d0a588c79593518dc133a7", size = 20330, upload-time = "2026-05-14T19:27:20.595Z" },
+]
+
+[[package]]
 name = "robotframework-requests"
 version = "0.9.7"
 source = { registry = "https://pypi.org/simple" }
@@ -1201,6 +1223,7 @@ version = "0.2.1"
 source = { editable = "." }
 dependencies = [
     { name = "robotframework" },
+    { name = "robotframework-assertion-engine" },
     { name = "testcontainers", extra = ["generic"] },
 ]
 
@@ -1217,6 +1240,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "robotframework", specifier = ">=7.3.2" },
+    { name = "robotframework-assertion-engine", specifier = ">=5.0.1" },
     { name = "testcontainers", extras = ["generic"], specifier = ">=4.15.0" },
 ]
 

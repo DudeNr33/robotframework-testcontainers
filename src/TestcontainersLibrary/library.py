@@ -1,7 +1,8 @@
 import importlib
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal, cast
 
+from assertionengine import AssertionOperator, verify_assertion
 from robot.api import logger
 from robot.api.deco import keyword, library
 from testcontainers.community.generic import ServerContainer
@@ -132,6 +133,47 @@ class TestcontainersLibrary:
         except Exception:
             container.stop()
             raise
+
+    @keyword
+    def get_container_logs(
+        self,
+        container: DockerContainer,
+        assertion_operator: AssertionOperator | None = None,
+        assertion_expected: Any = None,
+        message: str = "",
+        custom_message: str | None = None,
+        stream: Literal["stdout", "stderr"] = "stdout",
+    ) -> str:
+        """
+        Return a managed container's stdout or stderr.
+
+        Stdout is selected by default. Set ``stream=stderr`` to retrieve stderr.
+        Pass assertion-engine arguments after the container to assert against the
+        selected container log.
+
+        Examples:
+        | ${stderr}= | Get Container Logs | ${container} | stream=stderr |         |
+        |            | Get Container Logs | ${container} | contains      | started |
+        """
+        wrapped_container = container.get_wrapped_container()
+        if stream == "stdout":
+            log_bytes = wrapped_container.logs(stderr=False)
+        elif stream == "stderr":
+            log_bytes = wrapped_container.logs(stdout=False)
+        else:
+            raise ValueError("stream must be 'stdout' or 'stderr'")
+
+        container_log = log_bytes.decode("utf-8", errors="replace")
+        return cast(
+            str,
+            verify_assertion(
+                container_log,
+                assertion_operator,
+                assertion_expected,
+                message,
+                custom_message,
+            ),
+        )
 
     @keyword
     def wait_for_log_message(

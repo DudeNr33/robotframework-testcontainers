@@ -16,7 +16,11 @@ keywords = [
   "docker",
 ]
 requires-python = ">=3.10"
-dependencies = ["robotframework>=7.3.2", "testcontainers[generic]>=4.15.0"]
+dependencies = [
+    "robotframework>=7.3.2",
+    "robotframework-assertion-engine>=5.0.1",
+    "testcontainers[generic]>=4.15.0",
+]
 classifiers = [
   "Framework :: Robot Framework",
   "Framework :: Robot Framework :: Library",
