@@ -1,4 +1,5 @@
 import importlib
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Literal, cast
 
@@ -145,25 +146,35 @@ class TestcontainersLibrary:
         message: str = "",
         custom_message: str | None = None,
         stream: Literal["stdout", "stderr"] = "stdout",
+        since: datetime | None = None,
+        until: datetime | None = None,
+        timestamps: bool = False,
     ) -> str:
         """
         Return a managed container's stdout or stderr.
 
         Stdout is selected by default. Set ``stream=stderr`` to retrieve stderr.
-        Pass assertion-engine arguments after the container to assert against the
-        selected container log.
+        Pass absolute datetimes with ``since`` and ``until`` to bound the logs.
+        Set ``timestamps=True`` to include Docker timestamps in each line. Pass
+        assertion-engine arguments after the container to assert against the selected
+        container log.
 
         Examples:
         | ${stderr}= | Get Container Logs | ${container} | stream=stderr |         |
         |            | Get Container Logs | ${container} | contains      | started |
+        | ${logs}=   | Get Container Logs | ${container} | since=${start} | timestamps=${True} |
         """
         wrapped_container = container.get_wrapped_container()
-        if stream == "stdout":
-            log_bytes = wrapped_container.logs(stderr=False)
-        elif stream == "stderr":
-            log_bytes = wrapped_container.logs(stdout=False)
-        else:
-            raise ValueError("stream must be 'stdout' or 'stderr'")
+
+        stdout = stream == "stdout"
+        stderr = stream == "stderr"
+        log_bytes = wrapped_container.logs(
+            stdout=stdout,
+            stderr=stderr,
+            since=since,
+            until=until,
+            timestamps=timestamps,
+        )
 
         container_log = log_bytes.decode("utf-8", errors="replace")
         return cast(
