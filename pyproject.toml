@@ -52,6 +52,7 @@ dev = [
   "ruff>=0.14.2",
   "robotcode[all]>=2.0.1",
   "testcontainers[cockroachdb,redis]>=4.13.2",
+  "pytest>=9.1.1",
 ]
 
 [tool.mypy]
