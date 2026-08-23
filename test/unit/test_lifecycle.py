@@ -1,3 +1,5 @@
+from types import SimpleNamespace
+
 import pytest
 
 from TestcontainersLibrary import lifecycle
@@ -109,17 +111,44 @@ def test_remove_network_removes_it_from_automatic_cleanup(
 
 def test_listener_delegates_test_and_suite_cleanup() -> None:
     resources = CleanupRecorder()
-    listener = LifecycleListener(resources)  # type: ignore[arg-type]
+    capture = CaptureRecorder()
+    listener = LifecycleListener(resources, capture)  # type: ignore[arg-type]
 
-    listener.end_test(None, None)
+    listener.end_test(
+        SimpleNamespace(name="test"),
+        SimpleNamespace(
+            status="FAIL", longname="Suite.test", start_time="start", end_time="end"
+        ),
+    )
     listener.end_suite(None, None)
 
     assert resources.hooks == ["end_test", "end_suite"]
+    assert capture.events == [("write", "Suite", "test", "start", "end", ())]
 
 
 class CleanupRecorder:
     def __init__(self) -> None:
         self.hooks: list[str] = []
 
+    def active_containers(self) -> tuple[object, ...]:
+        return ()
+
     def cleanup(self, hook: str) -> None:
         self.hooks.append(hook)
+
+
+class CaptureRecorder:
+    def __init__(self) -> None:
+        self.events: list[tuple[object, ...]] = []
+
+    def write(
+        self,
+        suite_name: str,
+        test_name: str,
+        start_time: str,
+        end_time: str,
+        containers: tuple[object, ...],
+    ) -> None:
+        self.events.append(
+            ("write", suite_name, test_name, start_time, end_time, containers)
+        )

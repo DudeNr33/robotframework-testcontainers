@@ -82,6 +82,17 @@ Starting an CockroachDb Container
 
 You can read the acceptance tests in `test/acceptance/` for more concrete usage examples.
 
+## Failed-test log artifacts
+
+Pass `failure_logs_dir` when importing the library to retain stdout and stderr for containers the failed test started and that remain active when it ends:
+
+```robot
+*** Settings ***
+Library    TestcontainersLibrary    failure_logs_dir=${OUTPUT DIR}/container-logs
+```
+
+The library creates a timestamped run directory, then suite and test directories. Each container gets separate stdout and stderr files. The files contain raw container logs and may include passwords, tokens, or other secrets. Choose an artifact directory with suitable access and retention controls.
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
