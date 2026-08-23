@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import Any, Literal, cast
 
 from assertionengine import AssertionOperator, verify_assertion
-from robot.api import logger
 from robot.api.deco import keyword, library
 
 # see https://github.com/testcontainers/testcontainers-python/blob/main/src/testcontainers/generic.py#L9
@@ -13,16 +12,19 @@ from testcontainers.core.container import DockerContainer
 from testcontainers.core.network import Network
 from testcontainers.core.wait_strategies import HttpWaitStrategy, LogMessageWaitStrategy
 
+from TestcontainersLibrary.lifecycle import ResourceLifecycle
+from TestcontainersLibrary.listener import LifecycleListener
 
-@library(listener="SELF")
+
+@library
 class TestcontainersLibrary:
     """
     Keywords for [https://testcontainers.com/|Testcontainers].
     """
 
     def __init__(self) -> None:
-        self._containers: list[DockerContainer] = []
-        self._networks: list[Network] = []
+        self._resources = ResourceLifecycle()
+        self.ROBOT_LIBRARY_LISTENER = LifecycleListener(self._resources)
 
     @keyword
     def create_docker_container(
@@ -129,13 +131,7 @@ class TestcontainersLibrary:
         """
         Start the given container.
         """
-        try:
-            container.start()
-            self._containers.append(container)
-            return container
-        except Exception:
-            container.stop()
-            raise
+        return self._resources.start_container(container)
 
     @keyword
     def get_container_logs(
@@ -222,8 +218,7 @@ class TestcontainersLibrary:
         The library instance will take care of stopping all containers it has
         started during it's lifecycle via listener methods.
         """
-        self._containers.remove(container)
-        container.stop()
+        self._resources.stop_container(container)
 
     @keyword
     def create_network(self) -> Network:
@@ -232,18 +227,14 @@ class TestcontainersLibrary:
 
         Created networks are cleaned up automatically at the end of the test/suite.
         """
-        network = Network()
-        network.create()
-        self._networks.append(network)
-        return network
+        return self._resources.create_network()
 
     @keyword
     def remove_network(self, network: Network) -> None:
         """
         Delete the given network.
         """
-        self._networks.remove(network)
-        network.remove()
+        self._resources.remove_network(network)
 
     @keyword
     def connect_container_to_network(
@@ -259,29 +250,3 @@ class TestcontainersLibrary:
         if container_id is None:
             raise ValueError("Failed to obtain ID of wrapped container")
         network.connect(container_id=container_id, network_aliases=aliases)
-
-    def _end_test(self, name: Any, attrs: Any) -> None:
-        for container in self._containers.copy():
-            cname = container.get_wrapped_container().name
-            logger.console(
-                f"\n\tTestcontainersLibrary: stopping container {cname} in end_test hook."
-            )
-            self.stop_container(container)
-        for network in self._networks.copy():
-            logger.console(
-                f"\n\tTestcontainersLibrary: removing network {network.id} in end_test hook."
-            )
-            self.remove_network(network)
-
-    def _end_suite(self, name: Any, attrs: Any) -> None:
-        for container in self._containers.copy():
-            cname = container.get_wrapped_container().name
-            logger.console(
-                f"\n\tTestcontainersLibrary: stopping container {cname} in end_suite hook."
-            )
-            self.stop_container(container)
-        for network in self._networks.copy():
-            logger.console(
-                f"\n\tTestcontainersLibrary: removing network {network.id} in end_suite hook."
-            )
-            self.remove_network(network)
