@@ -25,6 +25,9 @@ class ResourceLifecycle:
         self._containers.remove(container)
         container.stop()
 
+    def active_containers(self) -> tuple[DockerContainer, ...]:
+        return tuple(self._containers)
+
     def create_network(self) -> Network:
         network = Network()
         network.create()
