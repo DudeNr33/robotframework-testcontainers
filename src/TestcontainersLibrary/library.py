@@ -5,7 +5,9 @@ from typing import Any, Literal, cast
 from assertionengine import AssertionOperator, verify_assertion
 from robot.api import logger
 from robot.api.deco import keyword, library
-from testcontainers.community.generic import ServerContainer
+
+# see https://github.com/testcontainers/testcontainers-python/blob/main/src/testcontainers/generic.py#L9
+from testcontainers.community.generic import ServerContainer  # type: ignore[attr-defined]  # ruff: isort: skip
 from testcontainers.core.container import DockerContainer
 from testcontainers.core.network import Network
 from testcontainers.core.wait_strategies import HttpWaitStrategy, LogMessageWaitStrategy
@@ -106,7 +108,7 @@ class TestcontainersLibrary:
         """
         _module = importlib.import_module(module)
         clazz = getattr(_module, container_class)
-        container = clazz(**kwargs)
+        container = cast(DockerContainer, clazz(**kwargs))
         if start:
             self.start_container(container)
         return container

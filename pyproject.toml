@@ -17,9 +17,9 @@ keywords = [
 ]
 requires-python = ">=3.10"
 dependencies = [
-    "robotframework>=7.3.2",
-    "robotframework-assertion-engine>=5.0.1",
-    "testcontainers[generic]>=4.15.0",
+  "robotframework>=7.3.2",
+  "robotframework-assertion-engine>=5.0.1",
+  "testcontainers[generic]>=4.15.0",
 ]
 classifiers = [
   "Framework :: Robot Framework",
@@ -46,7 +46,7 @@ module-root = "src"
 
 [dependency-groups]
 dev = [
-  "mypy>=1.18.2",
+  "mypy>=2.3.0",
   "pre-commit>=4.3.0",
   "robotframework-requests>=0.9.7",
   "ruff>=0.14.2",
