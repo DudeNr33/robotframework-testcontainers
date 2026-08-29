@@ -27,15 +27,15 @@ class TestcontainersLibrary:
         """
         ``failure_logs_dir`` enables failed-test log artifacts under this
         directory. For a failed test, the library saves separate stdout and
-        stderr files for containers that test started and that remain active at
-        test end. The files contain raw logs and may contain secrets.
+        stderr files for every active container started through the library.
+        The files contain raw logs and may contain secrets.
         """
         failed_log_capture = (
             FailedTestLogCapture(failure_logs_dir)
             if failure_logs_dir is not None
             else None
         )
-        self._resources = ResourceLifecycle()
+        self._resources = ResourceLifecycle.for_execution()
         self.ROBOT_LIBRARY_LISTENER = LifecycleListener(
             self._resources, failed_log_capture
         )
@@ -229,8 +229,8 @@ class TestcontainersLibrary:
         Stop the given container.
 
         It is not required to call this keyword manually just to clean up after tests.
-        The library instance will take care of stopping all containers it has
-        started during it's lifecycle via listener methods.
+        The library stops containers automatically when the Robot test or suite
+        that started them ends.
         """
         self._resources.stop_container(container)
 
@@ -239,7 +239,8 @@ class TestcontainersLibrary:
         """
         Create a network to connect different containers with each other.
 
-        Created networks are cleaned up automatically at the end of the test/suite.
+        Created networks are cleaned up when the Robot test or suite that created
+        them ends.
         """
         return self._resources.create_network()
 
