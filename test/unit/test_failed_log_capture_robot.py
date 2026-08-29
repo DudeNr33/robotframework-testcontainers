@@ -3,7 +3,7 @@ from pathlib import Path
 from robot import run  # type: ignore[attr-defined]
 
 
-def test_failed_robot_tests_write_only_their_container_logs(tmp_path: Path) -> None:
+def test_failed_robot_tests_capture_all_active_container_logs(tmp_path: Path) -> None:
     resources = tmp_path / "resources"
     resources.mkdir()
     (resources / "fake_container.py").write_text(
@@ -48,6 +48,9 @@ Captures failure
     Start Container    ${{container}}
     Fail    expected failure
 
+Stops suite setup container
+    Stop Container    ${{shared}}
+
 Skipped test
     ${{container}}=    Create Fake Container
     Start Container    ${{container}}
@@ -68,6 +71,7 @@ Stopped container failure
 Start shared container
     ${{container}}=    Create Fake Container
     Start Container    ${{container}}
+    Set Suite Variable    ${{shared}}    ${{container}}
 """.strip()
     )
 
@@ -78,6 +82,8 @@ Start shared container
 
     logs = list(artifacts.glob("**/*.log"))
     assert {log.name for log in logs} == {
+        "web-api-1-000000000000.stdout.log",
+        "web-api-1-000000000000.stderr.log",
         "web-api-2-000000000000.stdout.log",
         "web-api-2-000000000000.stderr.log",
     }

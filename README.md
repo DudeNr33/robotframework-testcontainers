@@ -37,9 +37,9 @@ Basic Usage Example
     Create Docker Container    image=hello-world
 ```
 
-`TestcontainersLibrary` keeps track of all created containers.
-It will take care of stopping all created containers at the end of the test,
-by making use of the `end_test`/`end_suite` listener methods.
+`TestcontainersLibrary` keeps track of all started containers. It stops containers
+started during a test when that test ends, and containers started during suite
+initialization or suite setup when that suite ends.
 
 If you require more control, you can also manually start and stop
 the container. Additionally, you can use different wait strategies
@@ -84,7 +84,7 @@ You can read the acceptance tests in `test/acceptance/` for more concrete usage 
 
 ## Failed-test log artifacts
 
-Pass `failure_logs_dir` when importing the library to retain stdout and stderr for containers the failed test started and that remain active when it ends:
+Pass `failure_logs_dir` when importing the library to retain stdout and stderr for every container started through the library that remains active when a test fails. The logs cover the failed test's time window, including containers started during suite initialization, suite setup, or earlier tests:
 
 ```robot
 *** Settings ***

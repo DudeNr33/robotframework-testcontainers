@@ -17,17 +17,29 @@ class LifecycleListener:
         self._resources = resources
         self._failed_log_capture = failed_log_capture
 
+    def start_suite(self, data: Any, result: Any) -> None:
+        self._resources.enter_suite(result.longname)
+
+    def start_test(self, data: Any, result: Any) -> None:
+        self._resources.enter_test(result.longname)
+
     def end_test(self, data: Any, result: Any) -> None:
-        if self._failed_log_capture is not None and result.status == "FAIL":
-            suite_name = result.longname.rsplit(".", 1)[0]
-            self._failed_log_capture.write(
-                suite_name,
-                data.name,
-                result.start_time,
-                result.end_time,
-                self._resources.active_containers(),
-            )
-        self._resources.cleanup("end_test")
+        try:
+            if self._failed_log_capture is not None and result.status == "FAIL":
+                suite_name = result.longname.rsplit(".", 1)[0]
+                self._failed_log_capture.write(
+                    suite_name,
+                    data.name,
+                    result.start_time,
+                    result.end_time,
+                    self._resources.active_containers(),
+                )
+            self._resources.cleanup_test(result.longname)
+        finally:
+            self._resources.clear_owner()
 
     def end_suite(self, data: Any, result: Any) -> None:
-        self._resources.cleanup("end_suite")
+        try:
+            self._resources.cleanup_suite(result.longname)
+        finally:
+            self._resources.clear_owner()
