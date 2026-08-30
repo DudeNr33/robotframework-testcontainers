@@ -259,8 +259,7 @@ def test_failed_manual_network_removal_leaves_network_tracked_for_cleanup(
 
 def test_listener_records_resource_owners_and_cleans_them() -> None:
     resources = CleanupRecorder()
-    capture = CaptureRecorder()
-    listener = LifecycleListener(resources, capture)  # type: ignore[arg-type]
+    listener = LifecycleListener(resources)  # type: ignore[arg-type]
     suite = SimpleNamespace(longname="Suite")
     test = SimpleNamespace(
         status="FAIL", longname="Suite.test", start_time="start", end_time="end"
@@ -279,7 +278,6 @@ def test_listener_records_resource_owners_and_cleans_them() -> None:
         ("cleanup_suite", "Suite"),
         ("clear_owner", ""),
     ]
-    assert capture.events == [("write", "Suite", "test", "start", "end", ())]
 
 
 class CleanupRecorder:
@@ -303,20 +301,3 @@ class CleanupRecorder:
 
     def cleanup_suite(self, longname: str) -> None:
         self.events.append(("cleanup_suite", longname))
-
-
-class CaptureRecorder:
-    def __init__(self) -> None:
-        self.events: list[tuple[object, ...]] = []
-
-    def write(
-        self,
-        suite_name: str,
-        test_name: str,
-        start_time: str,
-        end_time: str,
-        containers: tuple[object, ...],
-    ) -> None:
-        self.events.append(
-            ("write", suite_name, test_name, start_time, end_time, containers)
-        )

@@ -14,7 +14,6 @@ from testcontainers.core.wait_strategies import HttpWaitStrategy, LogMessageWait
 
 from TestcontainersLibrary.lifecycle import ResourceLifecycle
 from TestcontainersLibrary.listener import LifecycleListener
-from TestcontainersLibrary.log_capture import FailedTestLogCapture
 
 
 @library
@@ -23,22 +22,9 @@ class TestcontainersLibrary:
     Keywords for [https://testcontainers.com/|Testcontainers].
     """
 
-    def __init__(self, failure_logs_dir: Path | None = None) -> None:
-        """
-        ``failure_logs_dir`` enables failed-test log artifacts under this
-        directory. For a failed test, the library saves separate stdout and
-        stderr files for every active container started through the library.
-        The files contain raw logs and may contain secrets.
-        """
-        failed_log_capture = (
-            FailedTestLogCapture(failure_logs_dir)
-            if failure_logs_dir is not None
-            else None
-        )
+    def __init__(self) -> None:
         self._resources = ResourceLifecycle.for_execution()
-        self.ROBOT_LIBRARY_LISTENER = LifecycleListener(
-            self._resources, failed_log_capture
-        )
+        self.ROBOT_LIBRARY_LISTENER = LifecycleListener(self._resources)
 
     @keyword
     def create_docker_container(
