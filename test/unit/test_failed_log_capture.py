@@ -42,7 +42,12 @@ def test_writes_active_container_streams_in_safe_artifact_paths(tmp_path: Path) 
         "web-api-abcdef123456.stderr.log",
     }
     assert {artifact.read_text() for artifact in artifacts} == {"stdout", "stderr"}
-    assert all(call["since"] == start for call in container.calls)
+    assert all(
+        call["since"] == start - timedelta(seconds=1) for call in container.calls
+    )
+    assert all(
+        call["until"] == start + timedelta(seconds=2) for call in container.calls
+    )
 
 
 def test_container_log_failure_does_not_block_later_containers(
@@ -71,7 +76,7 @@ def test_container_log_failure_does_not_block_later_containers(
     assert len(later.calls) == 2
 
 
-def test_preserves_naive_robot_timestamps_for_log_collection(tmp_path: Path) -> None:
+def test_preserves_naive_timestamps_for_log_collection(tmp_path: Path) -> None:
     capture = FailedTestLogCapture(tmp_path)
     container = FakeContainer("local-time", "abcdef1234567890")
     start = datetime.now(timezone.utc).astimezone().replace(tzinfo=None)
@@ -84,10 +89,12 @@ def test_preserves_naive_robot_timestamps_for_log_collection(tmp_path: Path) -> 
         [container],  # type: ignore[list-item]
     )
 
-    assert all(call["since"] == start for call in container.calls)
+    assert all(
+        call["since"] == start - timedelta(seconds=1) for call in container.calls
+    )
 
 
-def test_shares_a_run_directory_between_test_scoped_instances(tmp_path: Path) -> None:
+def test_shares_run_directory_for_same_artifact_root(tmp_path: Path) -> None:
     start = datetime.now(timezone.utc)
     first = FailedTestLogCapture(tmp_path)
     second = FailedTestLogCapture(tmp_path)

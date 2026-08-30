@@ -1,6 +1,6 @@
 import re
 from collections.abc import Iterable
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import ClassVar
 
@@ -11,6 +11,7 @@ class FailedTestLogCapture:
     """Write active containers' logs when a Robot test fails."""
 
     _run_directories: ClassVar[dict[Path, Path]] = {}
+    _time_tolerance = timedelta(seconds=1)
 
     def __init__(self, artifact_root: Path) -> None:
         self._artifact_root = artifact_root
@@ -76,8 +77,8 @@ class FailedTestLogCapture:
                 log_bytes = wrapped_container.logs(
                     stdout=stream == "stdout",
                     stderr=stream == "stderr",
-                    since=start_time,
-                    until=end_time,
+                    since=start_time - self._time_tolerance,
+                    until=end_time + self._time_tolerance,
                     timestamps=False,
                 )
                 (artifact_directory / f"{filename}.{stream}.log").write_text(

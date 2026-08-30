@@ -36,47 +36,52 @@ def create_fake_container():
     artifacts = tmp_path / "artifacts"
     suite = tmp_path / "capture.robot"
     suite.write_text(
-        f"""
+        """
 *** Settings ***
-Library    TestcontainersLibrary    failure_logs_dir={artifacts}
+Library    TestcontainersLibrary
 Library    fake_container.py
 Suite Setup    Start shared container
 
 *** Test Cases ***
 Captures failure
-    ${{container}}=    Create Fake Container
-    Start Container    ${{container}}
+    ${container}=    Create Fake Container
+    Start Container    ${container}
     Fail    expected failure
 
 Stops suite setup container
-    Stop Container    ${{shared}}
+    Stop Container    ${shared}
 
 Skipped test
-    ${{container}}=    Create Fake Container
-    Start Container    ${{container}}
+    ${container}=    Create Fake Container
+    Start Container    ${container}
     Skip    expected skip
 
 Expected failure
-    ${{container}}=    Create Fake Container
-    Start Container    ${{container}}
+    ${container}=    Create Fake Container
+    Start Container    ${container}
     Run Keyword And Expect Error    *    Fail    expected failure
 
 Stopped container failure
-    ${{container}}=    Create Fake Container
-    Start Container    ${{container}}
-    Stop Container    ${{container}}
+    ${container}=    Create Fake Container
+    Start Container    ${container}
+    Stop Container    ${container}
     Fail    expected failure
 
 *** Keywords ***
 Start shared container
-    ${{container}}=    Create Fake Container
-    Start Container    ${{container}}
-    Set Suite Variable    ${{shared}}    ${{container}}
+    ${container}=    Create Fake Container
+    Start Container    ${container}
+    Set Suite Variable    ${shared}    ${container}
 """.strip()
     )
 
     assert (
-        run(str(suite), outputdir=str(tmp_path / "output"), pythonpath=[str(resources)])
+        run(
+            str(suite),
+            outputdir=str(tmp_path / "output"),
+            pythonpath=[str(resources)],
+            listener=f"TestcontainersLibrary.FailedTestLogCollector:{artifacts}",
+        )
         == 2
     )
 
@@ -88,3 +93,112 @@ Start shared container
         "web-api-2-000000000000.stderr.log",
     }
     assert {log.read_text() for log in logs} == {"stdout", "stderr"}
+
+
+def test_listener_captures_root_suite_container_for_child_without_library_import(
+    tmp_path: Path,
+) -> None:
+    helpers = tmp_path / "helpers"
+    helpers.mkdir()
+    (helpers / "fake_container.py").write_text(
+        """
+class FakeContainer:
+    name = "root-container"
+    id = "abcdef1234567890"
+
+    def start(self):
+        pass
+
+    def stop(self):
+        pass
+
+    def get_wrapped_container(self):
+        return self
+
+    def logs(self, stdout=True, **_):
+        return b"root stdout" if stdout else b"root stderr"
+
+
+def create_fake_container():
+    return FakeContainer()
+""".strip()
+    )
+    root = tmp_path / "root"
+    child = root / "child"
+    child.mkdir(parents=True)
+    (root / "__init__.robot").write_text(
+        """
+*** Settings ***
+Library    TestcontainersLibrary
+Library    fake_container.py
+Suite Setup    Start root container
+
+*** Keywords ***
+Start root container
+    ${container}=    Create Fake Container
+    Start Container    ${container}
+""".strip()
+    )
+    (child / "tests.robot").write_text(
+        """
+*** Test Cases ***
+Child failure
+    Fail    expected failure
+""".strip()
+    )
+    artifacts = tmp_path / "artifacts"
+
+    assert (
+        run(
+            str(root),
+            outputdir=str(tmp_path / "output"),
+            pythonpath=[str(helpers)],
+            listener=f"TestcontainersLibrary.FailedTestLogCollector:{artifacts}",
+        )
+        == 1
+    )
+
+    logs = list(artifacts.glob("**/*.log"))
+    assert {log.name for log in logs} == {
+        "root-container-abcdef123456.stdout.log",
+        "root-container-abcdef123456.stderr.log",
+    }
+    assert {log.read_text() for log in logs} == {"root stdout", "root stderr"}
+
+
+def test_passing_robot_test_does_not_create_artifact_root(tmp_path: Path) -> None:
+    suite = tmp_path / "passing.robot"
+    suite.write_text(
+        """
+*** Test Cases ***
+Passes
+    No Operation
+""".strip()
+    )
+    artifacts = tmp_path / "artifacts"
+
+    assert (
+        run(
+            str(suite),
+            outputdir=str(tmp_path / "output"),
+            listener=f"TestcontainersLibrary.FailedTestLogCollector:{artifacts}",
+        )
+        == 0
+    )
+    assert not artifacts.exists()
+
+
+def test_library_import_rejects_removed_failure_logs_argument(tmp_path: Path) -> None:
+    suite = tmp_path / "removed_argument.robot"
+    suite.write_text(
+        """
+*** Settings ***
+Library    TestcontainersLibrary    failure_logs_dir=artifacts
+
+*** Test Cases ***
+Cannot run
+    Get Container Logs    missing
+""".strip()
+    )
+
+    assert run(str(suite), outputdir=str(tmp_path / "output")) == 1

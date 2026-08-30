@@ -84,14 +84,15 @@ You can read the acceptance tests in `test/acceptance/` for more concrete usage 
 
 ## Failed-test log artifacts
 
-Pass `failure_logs_dir` when importing the library to retain stdout and stderr for every container started through the library that remains active when a test fails. The logs cover the failed test's time window, including containers started during suite initialization, suite setup, or earlier tests:
+Register the failed-test log collector on the Robot command line to retain stdout and stderr for every active container started through the library. The listener covers every test in the execution, including child suites that do not import `TestcontainersLibrary`:
 
-```robot
-*** Settings ***
-Library    TestcontainersLibrary    failure_logs_dir=${OUTPUT DIR}/container-logs
+```shell
+robot \
+  --listener TestcontainersLibrary.FailedTestLogCollector:/tmp/container-logs \
+  tests/
 ```
 
-The library creates a timestamped run directory, then suite and test directories. Each container gets separate stdout and stderr files. The files contain raw container logs and may include passwords, tokens, or other secrets. Choose an artifact directory with suitable access and retention controls.
+The log window extends one second before and after the failed test to account for Docker log timing. The listener creates a timestamped run directory, then suite and test directories. Each container gets separate stdout and stderr files. The files contain raw container logs and may include passwords, tokens, or other secrets. Choose an artifact directory with suitable access and retention controls.
 
 ## License
 
