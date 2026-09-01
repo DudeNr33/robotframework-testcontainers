@@ -88,11 +88,29 @@ Register the failed-test log collector on the Robot command line to retain stdou
 
 ```shell
 robot \
+  --listener TestcontainersLibrary.FailedTestLogCollector \
+  tests/
+```
+
+By default, artifacts go to `${OUTPUT_DIR}/container-logs`. Pass a different root after the listener name when needed:
+
+```shell
+robot \
   --listener TestcontainersLibrary.FailedTestLogCollector:/tmp/container-logs \
   tests/
 ```
 
-The log window extends one second before and after the failed test to account for Docker log timing. The listener creates a timestamped run directory, then suite and test directories. Each container gets separate stdout and stderr files. The files contain raw container logs and may include passwords, tokens, or other secrets. Choose an artifact directory with suitable access and retention controls.
+The listener uses absolute custom paths as written. It resolves relative custom paths from the process working directory, not Robot's output directory.
+
+The log window extends one second before and after the failed test to account for Docker log timing. Each Robot run gets one timestamped directory. Beneath it, the listener preserves the logical suite hierarchy:
+
+```text
+<artifact-root>/<timestamp>/<suite>/<child-suite>/<test>/<container files>
+```
+
+Unsafe path characters and whitespace become underscores. Each container gets separate stdout and stderr files. When collection writes at least one log or error file, `log.html` includes one INFO message with the absolute path to that test's artifact directory. Collection errors do not change the Robot test result.
+
+The files contain raw container logs and may include passwords, tokens, or other secrets. Choose an artifact directory with suitable access and retention controls.
 
 ## License
 

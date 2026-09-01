@@ -5,7 +5,11 @@ import pytest
 from TestcontainersLibrary import FailedTestLogCollector
 
 
-def test_rejects_empty_artifact_root() -> None:
+def test_artifact_root_is_optional() -> None:
+    FailedTestLogCollector()
+
+
+def test_rejects_explicit_empty_artifact_root() -> None:
     with pytest.raises(ValueError, match="must not be empty"):
         FailedTestLogCollector("")
 
