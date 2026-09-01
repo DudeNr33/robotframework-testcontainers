@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import pytest
 from robot import run  # type: ignore[attr-defined]
 
 
@@ -33,7 +34,8 @@ def create_fake_container():
     return FakeContainer()
 """.strip()
     )
-    artifacts = tmp_path / "artifacts"
+    output = tmp_path / "output"
+    artifacts = output / "container-logs"
     suite = tmp_path / "capture.robot"
     suite.write_text(
         """
@@ -78,25 +80,34 @@ Start shared container
     assert (
         run(
             str(suite),
-            outputdir=str(tmp_path / "output"),
+            outputdir=str(output),
             pythonpath=[str(resources)],
-            listener=f"TestcontainersLibrary.FailedTestLogCollector:{artifacts}",
+            listener="TestcontainersLibrary.FailedTestLogCollector",
         )
         == 2
     )
 
     logs = list(artifacts.glob("**/*.log"))
     assert {log.name for log in logs} == {
-        "web-api-1-000000000000.stdout.log",
-        "web-api-1-000000000000.stderr.log",
-        "web-api-2-000000000000.stdout.log",
-        "web-api-2-000000000000.stderr.log",
+        "web_api-1-000000000000.stdout.log",
+        "web_api-1-000000000000.stderr.log",
+        "web_api-2-000000000000.stdout.log",
+        "web_api-2-000000000000.stderr.log",
     }
     assert {log.read_text() for log in logs} == {"stdout", "stderr"}
+    artifact_directories = {log.parent for log in logs}
+    assert len(artifact_directories) == 1
+    artifact_directory = artifact_directories.pop()
+    assert artifact_directory.relative_to(artifacts).parts[1:] == (
+        "Capture",
+        "Captures_failure",
+    )
+    assert (output / "log.html").read_text().count(str(artifact_directory)) == 1
 
 
 def test_listener_captures_root_suite_container_for_child_without_library_import(
     tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     helpers = tmp_path / "helpers"
     helpers.mkdir()
@@ -147,13 +158,14 @@ Child failure
 """.strip()
     )
     artifacts = tmp_path / "artifacts"
+    monkeypatch.chdir(tmp_path)
 
     assert (
         run(
             str(root),
             outputdir=str(tmp_path / "output"),
             pythonpath=[str(helpers)],
-            listener=f"TestcontainersLibrary.FailedTestLogCollector:{artifacts}",
+            listener="TestcontainersLibrary.FailedTestLogCollector:artifacts",
         )
         == 1
     )
@@ -164,6 +176,38 @@ Child failure
         "root-container-abcdef123456.stderr.log",
     }
     assert {log.read_text() for log in logs} == {"root stdout", "root stderr"}
+    assert logs[0].parent.relative_to(artifacts).parts[1:] == (
+        "Root",
+        "Child",
+        "Tests",
+        "Child_failure",
+    )
+
+
+def test_failed_robot_test_without_active_containers_does_not_log_artifact_path(
+    tmp_path: Path,
+) -> None:
+    suite = tmp_path / "failing.robot"
+    suite.write_text(
+        """
+*** Test Cases ***
+Fails
+    Fail    expected failure
+""".strip()
+    )
+    artifacts = tmp_path / "artifacts"
+    output = tmp_path / "output"
+
+    assert (
+        run(
+            str(suite),
+            outputdir=str(output),
+            listener=f"TestcontainersLibrary.FailedTestLogCollector:{artifacts}",
+        )
+        == 1
+    )
+    assert not artifacts.exists()
+    assert str(artifacts) not in (output / "log.html").read_text()
 
 
 def test_passing_robot_test_does_not_create_artifact_root(tmp_path: Path) -> None:
