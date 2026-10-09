@@ -1,16 +1,16 @@
 repos:
 - repo: https://github.com/pre-commit/mirrors-mypy
-  rev: 'v2.3.1'
+  rev: 'v2.4.0'
   hooks:
     - id: mypy
       additional_dependencies: ['robotframework', 'testcontainers[generic]', 'robotframework-assertion-engine']
       files: ^src/
 - repo: https://github.com/astral-sh/uv-pre-commit
-  rev: 0.12.5
+  rev: 0.12.23
   hooks:
     - id: uv-lock
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.16.4
+  rev: v0.16.10
   hooks:
     - id: ruff-check
     - id: ruff-format
